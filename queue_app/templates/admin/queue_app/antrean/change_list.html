@@ -1,0 +1,12 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <script>
+        // Fitur Auto-Refresh: Halaman akan me-refresh sendiri setiap 5 detik (5000 milidetik)
+        // Jadi kalau ada data baru, tabelnya otomatis update!
+        setTimeout(function() {
+            window.location.reload();
+        }, 5000);
+    </script>
+{% endblock %}

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Display Smart Queue System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Animasi kedip untuk layar publik saat nomor berganti */
+        @keyframes flashHighlight {
+            0% { color: #facc15; text-shadow: 0 0 40px #facc15; transform: scale(1.05); }
+            50% { color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.5); transform: scale(1.1); }
+            100% { color: #ffffff; text-shadow: none; transform: scale(1); }
+        }
+        .animate-flash {
+            animation: flashHighlight 0.6s ease-out forwards;
+        }
+        
+        /* Font khusus agar angka terlihat seperti digital display */
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
+        .font-digital { font-family: 'Space Grotesk', sans-serif; }
+    </style>
+</head>
+<body class="flex h-screen w-full overflow-hidden font-sans m-0">
+
+    <div class="w-1/2 bg-slate-900 flex flex-col justify-center items-center relative p-8 shadow-2xl z-10">
+        
+        <h2 class="text-3xl md:text-5xl font-bold text-slate-400 mb-6 tracking-[0.2em] uppercase">
+            Nomor Antrean
+        </h2>
+        
+        <div class="bg-slate-800 border-4 border-blue-500 rounded-3xl px-24 py-12 mb-8 relative overflow-hidden group shadow-[0_0_50px_rgba(59,130,246,0.3)]">
+            <div class="absolute inset-0 bg-blue-500/10 group-hover:bg-blue-500/20 transition-all duration-500"></div>
+            
+            <h1 id="public-number" class="text-8xl md:text-[14rem] font-bold text-white leading-none font-digital tabular-nums transition-transform">
+                000
+            </h1>
+        </div>
+
+        <div id="public-instruction" class="text-3xl md:text-5xl font-medium text-yellow-400 animate-pulse transition-opacity duration-300 opacity-0 mb-10">
+            Silakan Menuju Loket 1
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 w-full max-w-lg">
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 text-center">
+                <p class="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-2">Antrean Saat Ini</p>
+                <p id="admin-current" class="text-5xl font-bold text-blue-400 font-digital">000</p>
+            </div>
+            <div class="bg-slate-800 p-6 rounded-2xl shadow-lg border border-slate-700 text-center relative overflow-hidden">
+                <p class="text-sm text-slate-400 font-semibold uppercase tracking-wider mb-2">Sisa Menunggu</p>
+                <p id="admin-waiting" class="text-5xl font-bold text-orange-400 font-digital">0</p>
+            </div>
+        </div>
+
+        <div class="absolute bottom-6 left-6 text-slate-500 text-sm tracking-widest uppercase">
+            Sistem Antrean Digital v1.0
+        </div>
+    </div>
+
+
+    <div class="w-1/2 bg-gray-50 flex flex-col justify-center items-center p-12 border-l border-gray-200 relative overflow-hidden">
+        
+        <div class="absolute top-0 right-0 w-64 h-64 bg-blue-100 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+        <div class="absolute bottom-0 left-0 w-80 h-80 bg-green-100 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
+
+        <div class="relative z-10 flex flex-col items-center">
+            <div class="mb-10 text-center">
+                <h2 class="text-5xl font-bold text-gray-800 mb-4">Daftar Mandiri</h2>
+                <p class="text-xl text-gray-500">Scan QR Code di bawah ini untuk mengambil nomor antrean melalui HP Anda.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-[2rem] shadow-2xl border border-gray-100 flex flex-col items-center">
+                <div class="bg-slate-50 p-4 rounded-2xl mb-6 border-2 border-dashed border-slate-200">
+                    <img id="qr-registrasi-utama" src="" alt="Loading QR..." class="w-80 h-80 object-cover rounded-xl shadow-inner">
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl animate-bounce">📱</span>
+                    <p class="text-lg font-bold text-slate-700 uppercase tracking-widest">Arahkan Kamera HP</p>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+
+    <script>
+       // Sekarang dia akan otomatis menyesuaikan diri! (Entah itu Localhost, IP WiFi, atau Ngrok)
+        const API_BASE_URL = window.location.origin + '/api';
+        
+
+        const publicNumberEl = document.getElementById('public-number');
+        const publicInstructionEl = document.getElementById('public-instruction');
+        const adminCurrentEl = document.getElementById('admin-current');
+        const adminWaitingEl = document.getElementById('admin-waiting');
+
+        let lastCalledNumber = 0;
+
+        function formatNumber(num) {
+            return num.toString().padStart(3, '0');
+        }
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/antrean/status/`);
+                const data = await response.json();
+
+                const currentQueue = data.antrean_sekarang;
+                const waitingCount = data.sisa_menunggu;
+
+                adminCurrentEl.innerText = formatNumber(currentQueue);
+                adminWaitingEl.innerText = waitingCount;
+                publicNumberEl.innerText = formatNumber(currentQueue);
+
+                // Efek kedip kalau nomor berubah
+                if (currentQueue !== lastCalledNumber && currentQueue > 0) {
+                    publicNumberEl.classList.remove('animate-flash');
+                    void publicNumberEl.offsetWidth; 
+                    publicNumberEl.classList.add('animate-flash');
+                    lastCalledNumber = currentQueue;
+                }
+
+                if (currentQueue > 0) {
+                    publicInstructionEl.classList.remove('opacity-0');
+                }
+            } catch (error) {
+                console.error("Gagal mengambil status:", error);
+            }
+        }
+
+        // --- SCRIPT GENERATE QR CODE ---
+        const baseUrl = window.location.origin; 
+        const linkRegistrasi = `${baseUrl}/`; 
+        
+        // Ukuran QR code dari API diperbesar jadi 500x500 agar tidak pecah saat ditampilkan besar
+        const urlQRUtama = `https://api.qrserver.com/v1/create-qr-code/?size=500x500&data=${encodeURIComponent(linkRegistrasi)}`;
+        document.getElementById('qr-registrasi-utama').src = urlQRUtama;
+
+        // Auto-refresh data setiap 1 detik
+        fetchStatus(); 
+        setInterval(fetchStatus, 1000); 
+    </script> 
+</body>
+</html>

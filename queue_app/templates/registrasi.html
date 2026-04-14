@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi Antrean</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center font-sans p-4 md:p-6">
+
+    <div class="bg-white rounded-3xl shadow-2xl w-full max-w-4xl flex flex-col md:flex-row overflow-hidden">
+        
+        <div class="w-full md:w-1/2 p-8 md:p-10 bg-white">
+            <h2 class="text-3xl font-bold text-slate-800 mb-2">Selamat Datang</h2>
+            <p class="text-sm text-slate-500 mb-8">Silakan isi data diri Anda untuk mengambil nomor antrean.</p>
+
+            <form id="form-registrasi" onsubmit="submitRegistrasi(event)" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap</label>
+                    <input id="input-nama" type="text" required class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan nama Anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nomor Induk (NIM/NIK)</label>
+                    <input id="input-nim" type="text" required class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Masukkan NIM / NIK">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Tujuan / Keperluan</label>
+                    <select id="input-keperluan" required onchange="cekPilihanLain()" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="">Pilih keperluan...</option>
+                        <option value="Layanan Akademik">Layanan Akademik</option>
+                        <option value="Layanan Keuangan">Layanan Keuangan</option>
+                        <option value="Lain-lain">Lain-lain</option>
+                    </select>
+                    
+                    <input id="input-keperluan-lain" type="text" class="w-full border border-slate-300 px-4 py-3 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none mt-3 hidden transition-all" placeholder="Ketik keperluan Anda...">
+                </div>
+
+                <button type="submit" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition">
+                    DAFTAR & AMBIL ANTREAN
+                </button>
+            </form>
+        </div>
+
+        <div class="w-full md:w-1/2 bg-slate-900 p-8 md:p-10 flex flex-col items-center justify-center text-center relative">
+            
+            <div id="area-hasil" class="hidden flex flex-col items-center w-full">
+                <h3 class="text-2xl font-bold text-white mb-2">Registrasi Berhasil!</h3>
+                <p class="text-slate-400 text-sm mb-6 md:hidden">Klik tombol di bawah untuk melihat tiket Anda.</p>
+                <p class="text-slate-400 text-sm mb-6 hidden md:block">Scan QR Code di bawah ini menggunakan kamera HP Anda.</p>
+                
+                <div class="bg-white p-4 rounded-2xl shadow-xl mb-4 hidden md:block">
+                    <div id="qr-kiosk" class="w-40 h-40 bg-slate-100 flex items-center justify-center rounded-xl overflow-hidden">
+                        <span class="text-slate-400 animate-pulse">Membuat QR...</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-800 px-8 py-4 rounded-2xl border border-slate-700 mb-6 w-full max-w-[200px]">
+                    <p class="text-xs text-slate-400">Nomor Anda:</p>
+                    <p id="kiosk-nomor" class="text-4xl font-bold text-blue-400 tracking-widest mt-1">000</p>
+                </div>
+
+                <button id="btn-langsung-buka" type="button" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-95 flex justify-center items-center gap-2 text-lg">
+                    <span>🚀</span> Buka Tiket Sekarang
+                </button>
+                
+                <button type="button" onclick="resetForm()" class="mt-6 text-sm text-slate-400 underline hover:text-white pb-4 md:pb-0">
+                    Daftarkan Orang Lain
+                </button>
+            </div>
+
+            <div id="area-tunggu" class="flex flex-col items-center opacity-50 py-10 md:py-0">
+                <p class="text-white font-semibold">Tiket Anda</p>
+                <p class="text-sm text-slate-400 mt-1">Akan muncul di area ini setelah form diisi</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API URL otomatis mendeteksi Ngrok/IP
+        const API_BASE_URL = window.location.origin + '/api';
+        let timerResetOtomatis;
+
+        function formatNumber(num) { return num.toString().padStart(3, '0'); }
+        function generateRandomCode(length) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let result = '';
+            for (let i = 0; i < length; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
+            return result;
+        }
+
+        function cekPilihanLain() {
+            const pilihan = document.getElementById('input-keperluan').value;
+            const inputLain = document.getElementById('input-keperluan-lain');
+            
+            if (pilihan === 'Lain-lain') {
+                inputLain.classList.remove('hidden');
+                inputLain.required = true;
+            } else {
+                inputLain.classList.add('hidden');
+                inputLain.required = false;
+                inputLain.value = '';
+            }
+        }
+
+        async function submitRegistrasi(event) {
+            event.preventDefault(); 
+            
+            document.getElementById('area-tunggu').classList.add('hidden');
+            document.getElementById('area-hasil').classList.remove('hidden');
+
+            let keperluanFinal = document.getElementById('input-keperluan').value;
+            if (keperluanFinal === 'Lain-lain') {
+                keperluanFinal = document.getElementById('input-keperluan-lain').value;
+            }
+
+            const dataPengunjung = {
+                nama: document.getElementById('input-nama').value,
+                nim: document.getElementById('input-nim').value,
+                keperluan: keperluanFinal 
+            };
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/antrean/ambil/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dataPengunjung) 
+                });
+
+                if(response.ok) {
+                    const statusRes = await fetch(`${API_BASE_URL}/antrean/status/`);
+                    const data = await statusRes.json();
+                    
+                    const nomorSaya = formatNumber(data.antrean_sekarang + data.sisa_menunggu);
+                    const kodeUnik = generateRandomCode(7);
+
+                    document.getElementById('kiosk-nomor').innerText = nomorSaya;
+
+                    const baseUrlFrontend = window.location.origin; 
+                    const linkUntukHP = `${baseUrlFrontend}/tiket-mobile/?nomor=${nomorSaya}&kode=${kodeUnik}`;
+
+                    const urlGambarQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkUntukHP)}`;
+                    document.getElementById('qr-kiosk').innerHTML = `<img src="${urlGambarQR}" class="w-full h-full object-cover" alt="QR Code">`;
+
+                    document.getElementById('btn-langsung-buka').onclick = function() {
+                        // Di HP, lebih baik buka di tab yang sama (self) agar gampang kembalinya
+                        window.location.href = linkUntukHP; 
+                    };
+
+                    document.getElementById('form-registrasi').reset();
+                    cekPilihanLain(); 
+                    document.querySelector('button[type="submit"]').disabled = true;
+                    document.querySelector('button[type="submit"]').classList.add('opacity-50');
+
+                    // Scroll otomatis ke bawah khusus pengguna HP agar tiket terlihat
+                    if(window.innerWidth < 768) {
+                        document.getElementById('area-hasil').scrollIntoView({ behavior: 'smooth' });
+                    }
+
+                    clearTimeout(timerResetOtomatis); 
+                    timerResetOtomatis = setTimeout(() => {
+                        resetForm();
+                    }, 15000); 
+                }
+            } catch(err) {
+                alert("Gagal koneksi ke server Django!");
+            }
+        }
+
+        function resetForm() {
+            clearTimeout(timerResetOtomatis); 
+            document.getElementById('area-hasil').classList.add('hidden');
+            document.getElementById('area-tunggu').classList.remove('hidden');
+            document.getElementById('qr-kiosk').innerHTML = '';
+            document.querySelector('button[type="submit"]').disabled = false;
+            document.querySelector('button[type="submit"]').classList.remove('opacity-50');
+            
+            document.getElementById('input-keperluan-lain').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>

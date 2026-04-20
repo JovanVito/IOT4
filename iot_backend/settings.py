@@ -71,8 +71,9 @@ WSGI_APPLICATION = 'iot_backend.wsgi.application'
 # Database
 DATABASES = {
     'default': dj_database_url.config(
-        # Ini akan memaksa Django mengambil link Neon dari Vercel
-        default=os.environ.get('DATABASE_URL')
+        default=os.environ.get('DATABASE_URL'),
+        conn_max_age=600,
+        ssl_require=True
     )
 }
 

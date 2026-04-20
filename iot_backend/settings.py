@@ -66,10 +66,10 @@ WSGI_APPLICATION = 'iot_backend.wsgi.application'
 
 # Database
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        # Ini akan memaksa Django mengambil link Neon dari Vercel
+        default=os.environ.get('DATABASE_URL')
+    )
 }
 
 

@@ -1,5 +1,5 @@
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.utils import timezone
 from .models import Antrean
@@ -12,13 +12,10 @@ def ambil_antrean(request):
     
     nomor_baru = 1 if not antrean_terakhir else antrean_terakhir.nomor_antrean + 1
     
-    # --- TAMBAHAN BARU: Tangkap data dari HTML ---
-    # Kalau dipencet dari "Simulasi Pengunjung" admin, nilainya jadi Anonim / strip (-)
-    nama_pengunjung = request.data.get('nama', 'Anonim')
+    nama_pengunjung = request.data.get('nama', 'Anonim Walk-in')
     nim_pengunjung = request.data.get('nim', '-')
-    keperluan_pengunjung = request.data.get('keperluan', '-')
+    keperluan_pengunjung = request.data.get('keperluan', 'Ambil via Sensor')
 
-    # Simpan nomor antrean LENGKAP dengan data pengunjungnya
     antrean = Antrean.objects.create(
         nomor_antrean=nomor_baru,
         nama=nama_pengunjung,
@@ -40,7 +37,7 @@ def status_antrean(request):
     })
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny]) # Diubah ke AllowAny untuk testing tombol ESP1
 def panggil_antrean(request):
     antrean_selanjutnya = Antrean.objects.filter(status='MENUNGGU').order_by('waktu_dibuat').first()
     
@@ -53,8 +50,7 @@ def panggil_antrean(request):
     return Response({'message': 'Tidak ada antrean yang menunggu'}, status=400)
 
 @api_view(['DELETE'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny]) # Diubah ke AllowAny untuk testing tombol ESP1
 def reset_antrean(request):
-    # Menghapus semua data di tabel Antrean
     Antrean.objects.all().delete()
     return Response({'message': 'Semua antrean berhasil dihapus dan direset ke 0'})

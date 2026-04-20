@@ -8,10 +8,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-kuncirahasia-dummy-gantinanti'
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# Izinkan domain Vercel kamu
+ALLOWED_HOSTS = ['*'] 
 
-ALLOWED_HOSTS = ['.vercel.app', '127.0.0.1']
+# Jika kamu menggunakan CORS (django-cors-headers)
+CORS_ALLOW_ALL_ORIGINS = True
+
+# Pastikan DEBUG dimatikan untuk produksi
+DEBUG = False
 
 
 # Application definition

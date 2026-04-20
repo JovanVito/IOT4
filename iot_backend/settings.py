@@ -72,7 +72,7 @@ WSGI_APPLICATION = 'iot_backend.wsgi.application'
 # Database
 DATABASES = {
     'default': dj_database_url.config(
-        default="postgresql://neondb_owner:password_kamu@ep-link-neon-kamu.tech/neondb?sslmode=require"
+        default="postgresql://neondb_owner:npg_4pjnBNOFXx2C@ep-small-sunset-a10nhoi6.ap-southeast-1.aws.neon.tech/neondb?sslmode=require"
     )
 }
 

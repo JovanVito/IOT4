@@ -1,11 +1,13 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from queue_app.views import home, ambil_antrean
 
 # --- TAMBAHAN BARU: Import TemplateView untuk menampilkan HTML ---
 from django.views.generic import TemplateView 
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
     
     # Ini untuk mengarahkan ke folder queue_app

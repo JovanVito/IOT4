@@ -9,7 +9,7 @@ from django.views.generic import TemplateView
 urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
-    
+    path('antrean/', include('antrean.urls')), # Pastikan ini ada
     # Ini untuk mengarahkan ke folder queue_app
     path('api/', include('queue_app.urls')), 
     

@@ -12,12 +12,8 @@ SECRET_KEY = 'django-insecure-kuncirahasia-dummy-gantinanti'
 # Izinkan domain Vercel kamu
 ALLOWED_HOSTS = ['*'] 
 
-# Jika kamu menggunakan CORS (django-cors-headers)
-CORS_ALLOW_ALL_ORIGINS = True
-
-# Pastikan DEBUG dimatikan untuk produksi
+# Pastikan DEBUG dimatikan untuk produksi (biarkan False)
 DEBUG = False
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -53,7 +49,10 @@ ROOT_URLCONF = 'iot_backend.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        # ==========================================
+        # INI YANG PALING PENTING AGAR TIDAK ERROR 500
+        # ==========================================
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -68,7 +67,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'iot_backend.wsgi.application'
 
-
 # Database
 DATABASES = {
     'default': dj_database_url.config(
@@ -76,26 +74,21 @@ DATABASES = {
     )
 }
 
-
 # Waktu & Bahasa
 LANGUAGE_CODE = 'id'
 TIME_ZONE = 'Asia/Jakarta'
 USE_I18N = True
 USE_TZ = True
 
-
 STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') # Tambahan wajib untuk Vercel
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
 
 # --- KONFIGURASI DRF, JWT & RATE LIMITING ---
 REST_FRAMEWORK = {
-    # 1. TAMBAHKAN INI BIAR DJANGO BISA BACA TOKEN JWT
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    
-    # 2. Ini yang Throttling tadi (biarkan saja seperti ini)
     'DEFAULT_THROTTLE_CLASSES': [
         'rest_framework.throttling.AnonRateThrottle',
         'rest_framework.throttling.UserRateThrottle'
@@ -105,10 +98,6 @@ REST_FRAMEWORK = {
         'user': '10000/day'   
     }
 }
-
-from datetime import timedelta  # Pastikan ini ada di paling atas file
-
-# ... (kode lain) ...
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),

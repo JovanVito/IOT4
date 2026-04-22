@@ -25,6 +25,9 @@ def ambil_antrean(request):
     
     return Response({'message': 'Antrean berhasil diambil', 'nomor': antrean.nomor_antrean})
 
+def home(request):
+    return render(request, 'index.html')
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def status_antrean(request):

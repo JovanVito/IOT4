@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from LKPS.lkps_project.core import views
 from queue_app.views import home, ambil_antrean
 
 # --- TAMBAHAN BARU: Import TemplateView untuk menampilkan HTML ---
@@ -10,6 +11,9 @@ urlpatterns = [
     path('', home, name='home'),
     path('admin/', admin.site.urls),
     path('antrean/', include('antrean.urls')), # Pastikan ini ada
+    path('ambil/', views.ambil_antrean, name='ambil'),
+    path('panggil/', views.panggil_antrean, name='panggil'),
+    path('reset/', views.reset_antrean, name='reset'),
     # Ini untuk mengarahkan ke folder queue_app
     path('api/', include('queue_app.urls')), 
     

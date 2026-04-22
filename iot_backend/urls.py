@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.views.generic import TemplateView 
 from django.http import HttpResponse
 
@@ -33,7 +33,6 @@ urlpatterns = [
     path('api/antrean/status/', queue_views.status_antrean, name='status'),
     path('api/antrean/panggil/', queue_views.panggil_antrean, name='panggil'),
     path('api/antrean/reset/', queue_views.reset_antrean, name='reset'),
-    path('antrean/', include('antrean.urls')),
 
     # =========================================================
     # 4. PELINDUNG SISTEM VERCEL

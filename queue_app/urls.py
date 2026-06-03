@@ -17,6 +17,9 @@ urlpatterns = [
     # Rute ini terlihat di halaman kuningmu sebelumnya, saya kembalikan agar tidak error
     # path('admin-loket/', views.admin_loket_view, name='admin_loket'), 
     # ==================================================================
+    # (Di bawah rute-rute antrean milikmu yang sebelumnya)
+    path('api/antrean/set_trigger/', views.set_trigger, name='set_trigger'),
+    path('api/antrean/cek_trigger/', views.cek_trigger, name='cek_trigger'),
 
 
     # ================= RUTE API TOKEN JWT =================

@@ -14,7 +14,6 @@
             <h2 class="text-3xl font-bold text-slate-800 mb-2">Selamat Datang</h2>
             <p class="text-sm text-slate-500 mb-6">Silakan isi data diri Anda untuk mengambil nomor antrean.</p>
 
-            <!-- ================= TAMBAHAN: BADGE INFORMASI LIVE ================= -->
             <div class="flex justify-between items-center mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
                 <div class="text-center w-1/2 border-r border-slate-200">
                     <p class="text-xs text-slate-500 font-semibold uppercase">Sedang Dilayani</p>
@@ -25,8 +24,6 @@
                     <p id="kiosk-live-sisa" class="text-2xl font-bold text-blue-600 mt-1">0</p>
                 </div>
             </div>
-            <!-- ================================================================ -->
-
             <form id="form-registrasi" onsubmit="submitRegistrasi(event)" class="space-y-5">
                 <div>
                     <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap</label>
@@ -91,8 +88,8 @@
     </div>
 
     <script>
-        // API URL otomatis mendeteksi Ngrok/IP
-        const API_BASE_URL = 'https://project-iot-delta.vercel.app/api';
+        // 1. PERBAIKAN: Gunakan path relatif agar aman dari isu Domain/CORS
+        const API_BASE_URL = '/api';
         let timerResetOtomatis;
 
         function formatNumber(num) { return num.toString().padStart(3, '0'); }
@@ -149,7 +146,8 @@
 
                     document.getElementById('kiosk-nomor').innerText = nomorSaya;
 
-                    const baseUrlFrontend = 'https://project-iot-delta.vercel.app'; 
+                    // URL untuk generate QR code
+                    const baseUrlFrontend = window.location.origin; 
                     const linkUntukHP = `${baseUrlFrontend}/tiket-mobile/?nomor=${nomorSaya}&kode=${kodeUnik}`;
 
                     const urlGambarQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkUntukHP)}`;
@@ -168,18 +166,20 @@
                         document.getElementById('area-hasil').scrollIntoView({ behavior: 'smooth' });
                     }
 
-                    // Panggil update live seketika agar UI form di atas langsung berubah!
                     fetchLiveStatusKiosk();
 
                     clearTimeout(timerResetOtomatis); 
                     timerResetOtomatis = setTimeout(() => {
                         resetForm();
                     }, 15000); 
+
                 } else {
-                    alert("Gagal mengambil antrean, silakan coba lagi.");
+                    // 2. PERBAIKAN: Tangkap pesan error asli dari server
+                    const errorText = await response.text();
+                    alert(`GAGAL! Status: ${response.status}\nAlasan Server: ${errorText}`);
                 }
             } catch(err) {
-                alert("Gagal koneksi ke server Django!");
+                alert("Gagal koneksi ke server! Cek internet atau URL.");
             }
         }
         
@@ -194,7 +194,6 @@
             document.getElementById('input-keperluan-lain').classList.add('hidden');
         }
 
-        // ================= TAMBAHAN: MESIN AUTO-REFRESH LIVE STATUS =================
         async function fetchLiveStatusKiosk() {
             try {
                 const response = await fetch(`${API_BASE_URL}/antrean/status/`);
@@ -212,12 +211,8 @@
             }
         }
 
-        // 1. Jalankan langsung saat halaman pertama kali dibuka
         fetchLiveStatusKiosk();
-        
-        // 2. Refresh otomatis setiap 3 detik secara diam-diam
         setInterval(fetchLiveStatusKiosk, 3000);
-        // ============================================================================
     </script>
 </body>
 </html>

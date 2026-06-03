@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 from queue_app import views 
 
-# Import tambahan untuk token JWT (Sesuai dengan kodingan aslimu di halaman kuning)
+# Import tambahan untuk token JWT
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
@@ -33,7 +33,11 @@ urlpatterns = [
     path('api/antrean/lewati/', views.lewati_antrean, name='lewati_antrean'),
     path('api/antrean/reset/', views.reset_antrean, name='reset_antrean'), 
     
-    # ======== RUTE BARU: UNTUK TABEL DI LAYAR TV ========
+    # ======== RUTE TABEL DI LAYAR TV ========
     path('api/antrean/daftar/', views.daftar_antrean_api, name='daftar_antrean_api'),
+
+    # ======== RUTE BARU: TRIGGER PAPAN TULIS (ESP32 PART 1 & 2) ========
+    path('api/antrean/set_trigger/', views.set_trigger, name='set_trigger'),
+    path('api/antrean/cek_trigger/', views.cek_trigger, name='cek_trigger'),
     # =======================================================================
 ]

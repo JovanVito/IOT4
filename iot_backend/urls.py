@@ -18,6 +18,7 @@ urlpatterns = [
     path('', TemplateView.as_view(template_name='registrasi.html'), name='kiosk_utama'),
     path('admin-loket/', TemplateView.as_view(template_name='index.html'), name='admin_loket'),
     path('tiket-mobile/', TemplateView.as_view(template_name='mobile.html'), name='tiket_mobile'),
+    path('api/antrean/daftar/', queue_views.views.daftar_antrean_api, name='daftar_antrean_api'),
 
     # =========================================================
     # 2. RUTE BACKEND & KEAMANAN JWT

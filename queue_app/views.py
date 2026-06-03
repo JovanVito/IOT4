@@ -7,6 +7,20 @@ from .models import Antrean
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
+
+def daftar_antrean_api(request):
+    antrean_list = Antrean.objects.filter(status='menunggu').order_by('nomor')[:10] # Ambil 10 teratas
+    
+    data = []
+    for item in antrean_list:
+        data.append({
+            'nomor': item.nomor,
+            'nama': item.nama,
+            'keperluan': item.keperluan
+        })
+    
+    return JsonResponse({'daftar': data})
+
 def ambil_antrean(request):
     try:
         hari_ini = timezone.now().date()

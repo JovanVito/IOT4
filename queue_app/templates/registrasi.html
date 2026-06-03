@@ -92,7 +92,7 @@
 
     <script>
         // API URL otomatis mendeteksi Ngrok/IP
-        const API_BASE_URL = window.location.origin + '/api';
+        const API_BASE_URL = 'https://project-iot-delta.vercel.app/api';
         let timerResetOtomatis;
 
         function formatNumber(num) { return num.toString().padStart(3, '0'); }
@@ -149,7 +149,7 @@
 
                     document.getElementById('kiosk-nomor').innerText = nomorSaya;
 
-                    const baseUrlFrontend = window.location.origin; 
+                    const baseUrlFrontend = 'https://project-iot-delta.vercel.app'; 
                     const linkUntukHP = `${baseUrlFrontend}/tiket-mobile/?nomor=${nomorSaya}&kode=${kodeUnik}`;
 
                     const urlGambarQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(linkUntukHP)}`;

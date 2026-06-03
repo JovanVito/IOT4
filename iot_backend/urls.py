@@ -1,42 +1,36 @@
 from django.contrib import admin
-from django.urls import path, include
-from django.views.generic import TemplateView 
-from django.http import HttpResponse
+from django.urls import path
+from queue_app import views 
 
+# Import tambahan untuk token JWT
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-# --- Panggil fungsi HANYA dari queue_app ---
-from queue_app import views as queue_views 
-
-def dummy_favicon(request):
-    return HttpResponse(status=204)
-
 urlpatterns = [
-    # =========================================================
-    # 1. HALAMAN FRONTEND (TAMPILAN UI)
-    # =========================================================
-    path('', TemplateView.as_view(template_name='registrasi.html'), name='kiosk_utama'),
-    path('admin-loket/', TemplateView.as_view(template_name='index.html'), name='admin_loket'),
-    path('tiket-mobile/', TemplateView.as_view(template_name='mobile.html'), name='tiket_mobile'),
-    path('api/antrean/daftar/', queue_views.views.daftar_antrean_api, name='daftar_antrean_api'),
-
-    # =========================================================
-    # 2. RUTE BACKEND & KEAMANAN JWT
-    # =========================================================
+    # Rute bawaan Django Admin
     path('admin/', admin.site.urls),
+
+    # ================= RUTE HALAMAN WEB (TAMPILAN UI) =================
+    path('', views.index_view, name='index'), 
+    path('registrasi/', views.registrasi_view, name='registrasi'), 
+    path('tiket-mobile/', views.mobile_view, name='mobile'), 
+
+    # ================= RUTE API TOKEN JWT =================
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
-    # =========================================================
-    # 3. RUTE API ANTREAN (UNTUK ESP32 & FRONTEND)
-    # =========================================================
-    path('api/antrean/ambil/', queue_views.ambil_antrean, name='ambil'),
-    path('api/antrean/status/', queue_views.status_antrean, name='status'),
-    path('api/antrean/panggil/', queue_views.panggil_antrean, name='panggil'),
-    path('api/antrean/reset/', queue_views.reset_antrean, name='reset'),
+    # ================= RUTE API (UNTUK ESP32 & JAVASCRIPT) =================
+    path('api/antrean/ambil/', views.ambil_antrean, name='ambil_antrean'),
+    path('api/antrean/status/', views.status_antrean, name='status_antrean'),
+    path('api/antrean/panggil/', views.panggil_antrean, name='panggil_antrean'),
+    
+    path('api/antrean/selesai/', views.selesai_antrean, name='selesai_antrean'),
+    path('api/antrean/lewati/', views.lewati_antrean, name='lewati_antrean'),
+    path('api/antrean/reset/', views.reset_antrean, name='reset_antrean'), 
+    
+    # ======== RUTE TABEL DI LAYAR TV ========
+    path('api/antrean/daftar/', views.daftar_antrean_api, name='daftar_antrean_api'),
 
-    # =========================================================
-    # 4. PELINDUNG SISTEM VERCEL
-    # =========================================================
-    path('favicon.ico', dummy_favicon),
+    # ======== RUTE BARU: TRIGGER PAPAN TULIS (ESP32 PART 1 & 2) ========
+    path('api/antrean/set_trigger/', views.set_trigger, name='set_trigger'),
+    path('api/antrean/cek_trigger/', views.cek_trigger, name='cek_trigger'),
 ]

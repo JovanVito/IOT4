@@ -13,7 +13,7 @@ SECRET_KEY = 'django-insecure-kuncirahasia-dummy-gantinanti'
 ALLOWED_HOSTS = ['*'] 
 
 # Pastikan DEBUG dimatikan untuk produksi (biarkan False)
-DEBUG = False
+DEBUG = True
 
 # Application definition
 INSTALLED_APPS = [

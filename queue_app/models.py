@@ -1,5 +1,12 @@
 from django.db import models
 
+class PengaturanSistem(models.Model):
+    # Kolom ini yang akan menjadi saklar "ON/OFF" untuk ESP32 Part 1
+    butuh_dipanggil = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Status Trigger: {self.butuh_dipanggil}"
+        
 class Antrean(models.Model):
     STATUS_CHOICES = (
         ('menunggu', 'Menunggu'),

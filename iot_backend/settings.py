@@ -41,8 +41,19 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+CSRF_TRUSTED_ORIGINS = [
+    'https://project-iot-delta.vercel.app',
+]
 
-CORS_ALLOW_ALL_ORIGINS = True # Supaya frontend HTML tidak diblokir
+# ================= PERBAIKAN CORS =================
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = False  # <--- WAJIB UBAH MENJADI FALSE
+# ==================================================
+
+# ================= TAMBAHAN WAJIB VERCEL =================
+# Memberi tahu Django bahwa koneksi dari Vercel adalah HTTPS yang aman
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# =========================================================
 
 ROOT_URLCONF = 'iot_backend.urls'
 

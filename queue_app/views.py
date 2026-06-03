@@ -128,3 +128,36 @@ def daftar_antrean_api(request):
     except Exception as e:
         return Response({'error': str(e)}, status=400)
 # =========================================================================
+# Pastikan kamu mengimpor model yang baru dibuat tadi di bagian paling atas!
+# from .models import Antrean, PengaturanSistem
+
+# ================== API UNTUK PART 2 (SENSOR ESP32-S3) ==================
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def set_trigger(request):
+    try:
+        # Cari data pengaturan, kalau belum ada di database, buat otomatis (id=1)
+        setting, created = PengaturanSistem.objects.get_or_create(id=1)
+        setting.butuh_dipanggil = True
+        setting.save()
+        return Response({'message': 'Trigger diset menjadi ON (True)'}, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)
+
+
+# ================== API UNTUK PART 1 (AUDIO ESP32-S2) ==================
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def cek_trigger(request):
+    try:
+        setting, created = PengaturanSistem.objects.get_or_create(id=1)
+        
+        # Cari antrean yang masih berstatus 'menunggu'
+        antrean_selanjutnya = Antrean.objects.filter(status='menunggu').order_by('waktu_dibuat').first()
+        
+        return Response({
+            'butuh_dipanggil': setting.butuh_dipanggil,
+            'nomor_dipanggil': antrean_selanjutnya.nomor_antrean if antrean_selanjutnya else 0
+        }, status=200)
+    except Exception as e:
+        return Response({'error': str(e)}, status=400)

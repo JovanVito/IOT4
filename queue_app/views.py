@@ -1,31 +1,31 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.utils import timezone
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.permissions import AllowAny
 
-# ======== TAMBAHAN: Import PengaturanSistem ========
+# ======== TAMBAHAN WAJIB MENCEGAH 403 FORBIDDEN ========
+from django.views.decorators.csrf import csrf_exempt
+# =======================================================
+
 from .models import Antrean, PengaturanSistem
-# ===================================================
 
+# ================= RUTE HALAMAN WEB =================
+def index_view(request):
+    return render(request, 'index.html')
+
+def registrasi_view(request):
+    return render(request, 'registrasi.html')
+
+def mobile_view(request):
+    return render(request, 'mobile.html')
+
+
+# ================= RUTE API ANTREAN =================
+@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
-
-def daftar_antrean_api(request):
-    antrean_list = Antrean.objects.filter(status='menunggu').order_by('nomor')[:10] # Ambil 10 teratas
-    
-    data = []
-    for item in antrean_list:
-        data.append({
-            'nomor': item.nomor,
-            'nama': item.nama,
-            'keperluan': item.keperluan
-        })
-    
-    return JsonResponse({'daftar': data})
-
 def ambil_antrean(request):
     try:
         hari_ini = timezone.now().date()
@@ -50,16 +50,6 @@ def ambil_antrean(request):
         return Response({'error': str(e)}, status=400)
 
 
-def index_view(request):
-    return render(request, 'index.html')
-
-def registrasi_view(request):
-    return render(request, 'registrasi.html')
-
-def mobile_view(request):
-    return render(request, 'mobile.html')
-
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def status_antrean(request):
@@ -75,16 +65,16 @@ def status_antrean(request):
         return Response({'error': str(e)}, status=400)
 
 
+@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def panggil_antrean(request):
     try:
-        # ================= PERBAIKAN TRIGGER =================
         # 1. Matikan saklar (WAJIB agar Part 1 berhenti bicara)
         setting, created = PengaturanSistem.objects.get_or_create(id=1)
         setting.butuh_dipanggil = False
         setting.save()
-        # =====================================================
 
         # 2. Logika Lama: Cari status 'menunggu', lalu ubah ke 'proses'
         antrean_selanjutnya = Antrean.objects.filter(status='menunggu').order_by('waktu_dibuat').first()
@@ -100,7 +90,9 @@ def panggil_antrean(request):
         return Response({'error': str(e)}, status=400)
 
 
+@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def selesai_antrean(request):
     antrean = Antrean.objects.filter(status='proses').first()
@@ -111,7 +103,9 @@ def selesai_antrean(request):
     return Response({'message': 'Tidak ada antrean yang sedang diproses'}, status=400)
 
 
+@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def lewati_antrean(request):
     antrean = Antrean.objects.filter(status='proses').first()
@@ -122,7 +116,9 @@ def lewati_antrean(request):
     return Response({'message': 'Tidak ada antrean yang sedang diproses'}, status=400)
 
 
+@csrf_exempt
 @api_view(['DELETE'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def reset_antrean(request):
     Antrean.objects.all().delete()
@@ -150,7 +146,9 @@ def daftar_antrean_api(request):
 
 # ================== API BARU: TRIGGER UNTUK ESP32 ==================
 
+@csrf_exempt
 @api_view(['POST'])
+@authentication_classes([])
 @permission_classes([AllowAny])
 def set_trigger(request):
     """ Ditembak oleh ESP32 Part 2 (Sensor) saat ada orang lewat """
@@ -178,5 +176,3 @@ def cek_trigger(request):
         }, status=200)
     except Exception as e:
         return Response({'error': str(e)}, status=400)
-
-# ===================================================================
